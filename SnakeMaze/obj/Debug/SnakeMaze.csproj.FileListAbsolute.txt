@@ -25,3 +25,12 @@ J:\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.csprojResolveAssemblyReference.cache
 J:\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.DrawingForm.resources
 J:\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.Properties.Resources.resources
 J:\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.csproj.GenerateResource.Cache
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Debug\SnakeMaze.exe.config
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.exe
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.pdb
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Debug\SnakeMaze.exe
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Debug\SnakeMaze.pdb
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.csprojResolveAssemblyReference.cache
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.DrawingForm.resources
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.Properties.Resources.resources
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Debug\SnakeMaze.csproj.GenerateResource.Cache
