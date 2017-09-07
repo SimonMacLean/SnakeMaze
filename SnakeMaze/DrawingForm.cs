@@ -127,6 +127,7 @@ namespace SnakeMaze
             _current = Grid[0][0];
             SpotStack = new Stack<Spot>();
             MazeMade = false;
+            Points = 0;
             while (!MazeMade)
             {
                 if (MakingMaze && !MazeMade)
@@ -724,12 +725,12 @@ namespace SnakeMaze
         }
 
         public Direction MovingDirection;
-        public int Speed = 1;
+        public int Speed = 2;
         public int TicksPassed;
         public static List<PointD> Segments;
         public static int SnakeSize = 12;
         public Spot CurrentSpot;
-        public int MovementDistance = 2;
+        public int MovementDistance = 5;
 
         public Snake(Point location, Direction startingDirection)
         {
