@@ -47,5 +47,54 @@ namespace SnakeMaze.Properties {
                 this["levelScores"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"[ -4144897 ] [ -1 ] [ -256 ] [ -65536 ] [ -16711681 ] [ -23296 ] [ -60269 ] [ -4144897 -1 ] [ -1 -65536 ] [ -65536 -4144897 ] [ -12042869 -256 ] [ -1 -16777216 ] [ -16777216 -60269 -1 ] [ -65536 -1 -16776961 ] [ -65536 -256 -16776961 ] [ -65536 -23296 -256 -16744448 -16776961 -11861886 -3730043 ] ")]
+        public string RewardString {
+            get {
+                return ((string)(this["RewardString"]));
+            }
+            set {
+                this["RewardString"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000000000000000")]
+        public string EnabledString {
+            get {
+                return ((string)(this["EnabledString"]));
+            }
+            set {
+                this["EnabledString"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(" 0 100 250 500 1000 2500 5000 10000 25000 50000 100000 200000 300000 400000 50000" +
+            "0 1000000 ")]
+        public string Costs {
+            get {
+                return ((string)(this["Costs"]));
+            }
+            set {
+                this["Costs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CurrentColor {
+            get {
+                return ((int)(this["CurrentColor"]));
+            }
+            set {
+                this["CurrentColor"] = value;
+            }
+        }
     }
 }
