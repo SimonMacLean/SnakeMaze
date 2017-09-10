@@ -8,5 +8,17 @@
     <Setting Name="levelScores" Type="System.String" Scope="User">
       <Value Profile="(Default)">cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</Value>
     </Setting>
+    <Setting Name="RewardString" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[ -4144897 ] [ -1 ] [ -256 ] [ -65536 ] [ -16711681 ] [ -23296 ] [ -60269 ] [ -4144897 -1 ] [ -1 -65536 ] [ -65536 -4144897 ] [ -12042869 -256 ] [ -1 -16777216 ] [ -16777216 -60269 -1 ] [ -65536 -1 -16776961 ] [ -65536 -256 -16776961 ] [ -65536 -23296 -256 -16744448 -16776961 -11861886 -3730043 ] </Value>
+    </Setting>
+    <Setting Name="EnabledString" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1000000000000000</Value>
+    </Setting>
+    <Setting Name="Costs" Type="System.String" Scope="User">
+      <Value Profile="(Default)"> 0 100 250 500 1000 2500 5000 10000 25000 50000 100000 200000 300000 400000 500000 1000000 </Value>
+    </Setting>
+    <Setting Name="CurrentColor" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

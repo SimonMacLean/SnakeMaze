@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using SnakeMaze.Properties;
@@ -33,14 +34,13 @@ namespace SnakeMaze
         public static string LevelScores;
         public static Point MouseLocation;
         private static Spot _current;
-
+        public static Store MainStore;
         public static double DirectDistanceBetween(bool useTaxiCab, int ax, int ay, int bx, int by)
         {
             if (useTaxiCab)
                 return Math.Abs(ax - bx) + Math.Abs(ay - by);
             return Math.Sqrt(Math.Pow(ax - bx, 2) + Math.Pow(ay - by, 2));
         }
-
         public static double DistanceBetween(bool useTaxiCab, int ax, int ay, int bx, int by, int limitSizeX)
         {
             if (!CanloopX)
@@ -50,12 +50,10 @@ namespace SnakeMaze
             double loopedB = DirectDistanceBetween(useTaxiCab, ax, ay, bx + limitSizeX, by);
             return loopedA < loopedB ? (loopedA < normal ? loopedA : normal) : (loopedB < normal ? loopedB : normal);
         }
-
         public static int RealPixels(int pixels)
         {
             return (int) (pixels * PixelSize);
         }
-
         public DrawingForm()
         {
             InitializeComponent();
@@ -91,12 +89,26 @@ namespace SnakeMaze
             nextButton.OnClick += NextLevel;
             Buttons.Add(nextButton);
             CustomButton levelButton =
-                new CustomButton("levelButton", Point.Empty, "LEVELS", Color.White, Color.DarkSlateBlue, Color.SlateBlue,
+                new CustomButton("levelButton", Point.Empty, "LEVELS", Color.White, Color.DarkSlateBlue,
+                        Color.SlateBlue,
                         new Font(FontFamily.GenericMonospace, RealPixels(50)), G)
                     { Enabled = false };
             levelButton.OnClick += Levels;
             Buttons.Add(levelButton);
-
+            CustomButton backLevelButton =
+                new CustomButton("backLevelButton", Point.Empty, "BACK TO LEVELS", Color.White, Color.DarkSlateBlue,
+                        Color.SlateBlue,
+                        new Font(FontFamily.GenericMonospace, RealPixels(20)), G)
+                    { Enabled = false };
+            backLevelButton.OnClick += Levels;
+            Buttons.Add(backLevelButton);
+            CustomButton storeButton =
+                new CustomButton("storeButton", Point.Empty, "STORE", Color.White, Color.DarkSlateBlue,
+                        Color.SlateBlue,
+                        new Font(FontFamily.GenericMonospace, RealPixels(20)), G)
+                    { Enabled = false };
+            storeButton.OnClick += GoToStore;
+            Buttons.Add(storeButton);
             var t = new Timer
             {
                 Enabled = true,
@@ -106,8 +118,8 @@ namespace SnakeMaze
             TotalPoints = Settings.Default.TotalPoints;
             TargetTotalPoints = TotalPoints;
             MainMenu = new Menu(i, BoundsRectangle);
+            MainStore = new Store(BoundsRectangle);
         }
-
         public static void Init()
         {
             GridSize = new Point((BoundsRectangle.Width - RealPixels(20)) / SpotSize,
@@ -127,6 +139,7 @@ namespace SnakeMaze
             _current = Grid[0][0];
             SpotStack = new Stack<Spot>();
             MazeMade = false;
+            Points = 0;
             while (!MazeMade)
             {
                 if (MakingMaze && !MazeMade)
@@ -228,20 +241,21 @@ namespace SnakeMaze
                 : new Snake(
                     new Point((SpotSize - Snake.SnakeSize) / 2 + Offset.X, (SpotSize - Snake.SnakeSize) / 2 + Offset.Y),
                     Snake.Direction.Down);
+            Snake.Colors = Store.AwardList[Settings.Default.CurrentColor];
         }
-
         private void T_Tick(object sender, EventArgs e)
         {
             Invalidate();
             if (TotalPoints < TargetTotalPoints)
                 TotalPoints += 1;
+            if (TotalPoints > TargetTotalPoints)
+                TotalPoints -= 10;
             if (GameState != 2) return;
             PlayerSnake.Update();
             if (!Grid[Grid.Length - 1][Grid[0].Length - 1].WasEaten || GameState == 4) return;
             GameState = 4;
             TargetTotalPoints += 50;
         }
-
         private void DrawingForm_Paint(object sender, PaintEventArgs e)
         {
             if (GameState == 2)
@@ -285,6 +299,9 @@ namespace SnakeMaze
                 if (GameState == 1)
                 {
                     MainMenu.Draw(e.Graphics);
+                    SizeF sizeLarge = G.MeasureString("STORE",
+                        new Font(FontFamily.GenericMonospace, RealPixels(25)));
+                    EnableButton("storeButton", new Point((int)(container.Width - topLeft.X - sizeLarge.Width/2), topLeft.Y));
                 }
                 if (GameState == 3)
                 {
@@ -303,7 +320,8 @@ namespace SnakeMaze
                     EnableButton("retryButton",
                         new Point(topLeft.X + container.Width / 3, topLeft.Y + topPadding + betweenTextPadding * 2));
                     EnableButton("levelButton",
-                        new Point(topLeft.X +  2 * container.Width / 3, topLeft.Y + topPadding + betweenTextPadding * 2));
+                        new Point(topLeft.X + 2 * container.Width / 3,
+                            topLeft.Y + topPadding + betweenTextPadding * 2));
                 }
                 if (GameState == 4)
                 {
@@ -339,11 +357,18 @@ namespace SnakeMaze
                         new Point(topLeft.X + 3 * container.Width / 4,
                             topLeft.Y + topPadding + betweenTextPadding * 2));
                     Settings.Default.levelScores =
-                        LevelScores.Substring(0, StartingSpotSize - SpotSize) + stars +
-                        (LevelScores.Substring(StartingSpotSize - SpotSize + 1, 1) == "x"
+                        LevelScores.Substring(0, (StartingSpotSize - SpotSize)/2) + stars +
+                        (LevelScores.Substring((StartingSpotSize - SpotSize) / 2 + 1, 1) == "x"
                             ? "c"
-                            : LevelScores.Substring(StartingSpotSize - SpotSize + 1, 1)) +
-                        LevelScores.Substring(StartingSpotSize + 2 - SpotSize);
+                            : LevelScores.Substring((StartingSpotSize - SpotSize) / 2 + 1, 1)) +
+                        LevelScores.Substring((StartingSpotSize - SpotSize) / 2 + 2);
+                }
+                if (GameState == 5)
+                {
+                    MainStore.Draw(e.Graphics);
+                    SizeF sizeLarge = G.MeasureString("BACK TO LEVELS",
+                        new Font(FontFamily.GenericMonospace, RealPixels(20)));
+                    EnableButton("backLevelButton", new Point((int)(container.Width + topLeft.X - sizeLarge.Width/2 - RealPixels(25)), topLeft.Y));
                 }
             }
             foreach (CustomButton c in Buttons)
@@ -352,7 +377,6 @@ namespace SnakeMaze
                     c.Draw(e.Graphics);
             }
         }
-
         private static void NextLevel(object sender, EventArgs eventArgs)
         {
             foreach (CustomButton c in Buttons)
@@ -364,7 +388,6 @@ namespace SnakeMaze
             LevelScores = Settings.Default.levelScores;
             Init();
         }
-
         public void OnDeath(object sender, EventArgs eventArgs)
         {
             //TotalPoints -= Points;
@@ -383,7 +406,6 @@ namespace SnakeMaze
                 s.WasEaten = false;
             GameState = 2;
         }
-
         public void OnStart(object sender, EventArgs eventArgs)
         {
             foreach (CustomButton c in Buttons)
@@ -391,7 +413,6 @@ namespace SnakeMaze
             Init();
             GameState = 1;
         }
-        
         private static void Levels(object sender, EventArgs eventArgs)
         {
             foreach (CustomButton c in Buttons)
@@ -400,47 +421,66 @@ namespace SnakeMaze
             Settings.Default.Save();
             LevelScores = Settings.Default.levelScores;
         }
-
+        private static void GoToStore(object sender, EventArgs eventArgs)
+        {
+            foreach (CustomButton c in Buttons)
+                c.Enabled = false;
+            GameState = 5;
+            Settings.Default.Save();
+        }
         private void DrawingForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (GameState == 2)
+            switch (GameState)
             {
-                switch (e.KeyCode)
-                {
-                    case Keys.Up:
-                        if (PlayerSnake.MovingDirection != Snake.Direction.Down)
-                            PlayerSnake.MovingDirection = Snake.Direction.Up;
-                        break;
-                    case Keys.Right:
-                        if (PlayerSnake.MovingDirection != Snake.Direction.Left)
-                            PlayerSnake.MovingDirection = Snake.Direction.Right;
-                        break;
-                    case Keys.Down:
-                        if (PlayerSnake.MovingDirection != Snake.Direction.Up)
-                            PlayerSnake.MovingDirection = Snake.Direction.Down;
-                        break;
-                    case Keys.Left:
-                        if (PlayerSnake.MovingDirection != Snake.Direction.Right)
-                            PlayerSnake.MovingDirection = Snake.Direction.Left;
-                        break;
-                }
-            }
-            else if (GameState == 1)
-            {
-                switch (e.KeyCode)
-                {
-                    case Keys.Right:
-                        if (MainMenu.Level < LevelScores.Length)
-                            MainMenu.Level++;
-                        break;
-                    case Keys.Left:
-                        if (MainMenu.Level > 1)
-                            MainMenu.Level--;
-                        break;
-                }
+                case 2:
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Up:
+                            if (PlayerSnake.MovingDirection != Snake.Direction.Down)
+                                PlayerSnake.MovingDirection = Snake.Direction.Up;
+                            break;
+                        case Keys.Right:
+                            if (PlayerSnake.MovingDirection != Snake.Direction.Left)
+                                PlayerSnake.MovingDirection = Snake.Direction.Right;
+                            break;
+                        case Keys.Down:
+                            if (PlayerSnake.MovingDirection != Snake.Direction.Up)
+                                PlayerSnake.MovingDirection = Snake.Direction.Down;
+                            break;
+                        case Keys.Left:
+                            if (PlayerSnake.MovingDirection != Snake.Direction.Right)
+                                PlayerSnake.MovingDirection = Snake.Direction.Left;
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Right:
+                            if (MainMenu.Level < LevelScores.Length)
+                                MainMenu.Level++;
+                            break;
+                        case Keys.Left:
+                            if (MainMenu.Level > 1)
+                                MainMenu.Level--;
+                            break;
+                    }
+                    break;
+                case 5:
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Right:
+                            if (MainStore.CurrentItem < Store.AwardList.Count - 1)
+                                MainStore.CurrentItem++;
+                            break;
+                        case Keys.Left:
+                            if (MainStore.CurrentItem >= 1)
+                                MainStore.CurrentItem--;
+                            break;
+                    }
+                    break;
             }
         }
-
         private static void EnableButton(string name, Point center)
         {
             foreach (CustomButton c in Buttons)
@@ -451,7 +491,6 @@ namespace SnakeMaze
                 c.Location = center - new Size((int) measureString.Width / 2, (int) measureString.Height / 2);
             }
         }
-
         private void DrawingForm_MouseMove(object sender, MouseEventArgs e)
         {
             foreach (CustomButton c in Buttons)
@@ -461,12 +500,15 @@ namespace SnakeMaze
             }
             MouseLocation = e.Location;
         }
-
         private void DrawingForm_Click(object sender, EventArgs e)
         {
             if (GameState == 1)
             {
                 MainMenu.OnClick(MouseLocation);
+            }
+            if (GameState == 5)
+            {
+                MainStore.OnClick(MouseLocation);
             }
             foreach (CustomButton c in Buttons)
             {
@@ -474,7 +516,6 @@ namespace SnakeMaze
                 c.OnClick.Invoke(sender, e);
             }
         }
-
         private void DrawingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Settings.Default.TotalPoints = TotalPoints;
@@ -502,7 +543,6 @@ namespace SnakeMaze
         public Point[] FillVerticies { get; }
         public List<Spot> Neighbors;
         public Point CenterPoint;
-
         public Spot(int i, int j)
         {
             X = j;
@@ -526,7 +566,6 @@ namespace SnakeMaze
             CenterPoint = new Point(DrawVerticies[0].X + DrawingForm.SpotSize / 2,
                 DrawVerticies[0].Y + DrawingForm.SpotSize / 2);
         }
-
         public void AddNeighbors(Spot[][] grid)
         {
             Neighbors = new List<Spot>();
@@ -574,7 +613,6 @@ namespace SnakeMaze
                     Neighbors.Add(grid[Y - 1][X - 1]);
             }
         }
-
         public Spot GetRandomNeighbor(Spot[][] grid)
         {
             Neighbors = new List<Spot>();
@@ -588,7 +626,7 @@ namespace SnakeMaze
                 if (!grid[Y][(X + 1) % grid[Y].Length].Visited || R.Next(CanGoThroughWallsChance) == 0)
                     Neighbors.Add(grid[Y][(X + 1) % grid[Y].Length]);
                 if (Y > 0 && (!grid[(Y + grid.Length - 1) % grid.Length][X].Visited ||
-                              R.Next(CanGoThroughWallsChance) == 0))
+                                R.Next(CanGoThroughWallsChance) == 0))
                     Neighbors.Add(grid[(Y + grid.Length - 1) % grid.Length][X]);
                 return Neighbors.Count > 0 ? Neighbors[R.Next(Neighbors.Count)] : null;
             }
@@ -602,7 +640,6 @@ namespace SnakeMaze
                 Neighbors.Add(grid[Y - 1][X]);
             return Neighbors.Count > 0 ? Neighbors[R.Next(Neighbors.Count)] : null;
         }
-
         public void Draw(Graphics canvas)
         {
             for (int i = 0; i < _wallsActive.Length; i++)
@@ -624,7 +661,6 @@ namespace SnakeMaze
                     CenterPoint.Y - Snake.SnakeSize / 2, Snake.SnakeSize, Snake.SnakeSize);
             }
         }
-
         public static Spot[] ChangeWalls(Spot a, Spot b, int gridSizeY, int gridSizeX, bool wallSetting)
         {
             int xDif = a.X - b.X;
@@ -664,7 +700,6 @@ namespace SnakeMaze
             Spot[] result = {a, b};
             return result;
         }
-
         public bool CanReach(Spot other)
         {
             if (DrawingForm.UseTaxiCab &&
@@ -698,15 +733,12 @@ namespace SnakeMaze
     {
         public double X;
         public double Y;
-
         public Point Point => new Point((int) X, (int) Y);
-
         public PointD(double x, double y)
         {
             X = x;
             Y = y;
         }
-
         public static PointD operator +(PointD p, PointD p2)
         {
             return new PointD(p.X + p2.X, p.Y + p2.Y);
@@ -722,18 +754,18 @@ namespace SnakeMaze
             Down,
             Left
         }
-
         public Direction MovingDirection;
-        public int Speed = 1;
+        public int Speed = 2;
         public int TicksPassed;
         public static List<PointD> Segments;
+        public static List<Color> Colors;
         public static int SnakeSize = 12;
         public Spot CurrentSpot;
-        public int MovementDistance = 2;
-
+        public int MovementDistance = 5;
         public Snake(Point location, Direction startingDirection)
         {
             Segments = new List<PointD> {new PointD(location.X, location.Y)};
+            Colors = new List<Color>();
             MovingDirection = startingDirection;
             for (int i = 1; i <= 48 / MovementDistance; i++)
             {
@@ -755,18 +787,22 @@ namespace SnakeMaze
             }
             Inside(DrawingForm.Grid[0][0]);
             CurrentSpot = DrawingForm.Grid[0][0];
+            foreach (PointD dummy in Segments)
+            {
+                Colors.Add(Color.FromArgb(192, 192, 255));
+            }
         }
-
         public void Draw(Graphics g)
         {
-            foreach (PointD p in Segments)
+            for (int i = 0; i < Segments.Count; i++)
             {
-                g.FillEllipse(new SolidBrush(Color.FromArgb(192, 192, 255)), p.Point.X - 1, p.Point.Y - 1,
+                PointD p = Segments[Segments.Count - 1 - i];
+                g.FillEllipse(new SolidBrush(Colors[(Segments.Count - 1 - i) % Colors.Count]), p.Point.X - 1,
+                    p.Point.Y - 1,
                     SnakeSize + 1,
                     SnakeSize + 1);
             }
         }
-
         public void Update()
         {
             TicksPassed = (TicksPassed + 1) % Speed;
@@ -791,55 +827,67 @@ namespace SnakeMaze
                     break;
             }
             bool inNewSpot = false;
-            foreach (Spot[] s1 in DrawingForm.Grid)
+            Spot q = CurrentSpot;
+            if (!FullyInside(CurrentSpot))
             {
-                foreach (Spot s in s1)
+                foreach (Spot[] s1 in DrawingForm.Grid)
                 {
-                    if (!Inside(s) || s.X == CurrentSpot.X && s.Y == CurrentSpot.Y) continue;
-                    if (!CurrentSpot.CanReach(s))
+                    foreach (Spot s in s1)
                     {
-                        DrawingForm.GameState = 3;
+                        if (!Inside(s) || s.X == CurrentSpot.X && s.Y == CurrentSpot.Y || s.X == q.X && s.Y == q.Y) continue;
+                        if (!CurrentSpot.CanReach(s))
+                        {
+                            DrawingForm.GameState = 3;
+                        }
+                        inNewSpot = true;
+                        CurrentSpot = s;
                     }
-                    inNewSpot = true;
-                    CurrentSpot = s;
                 }
-            }
-            if (!inNewSpot && !FullyInside(CurrentSpot))
-            {
-                DrawingForm.GameState = 3;
+                if (!inNewSpot)
+                    DrawingForm.GameState = 3;
             }
             if (Overlapping())
                 DrawingForm.GameState = 3;
             if (!(DrawingForm.DirectDistanceBetween(false, (int) Segments[0].X + SnakeSize / 2,
-                      (int) Segments[0].Y + SnakeSize / 2,
-                      CurrentSpot.CenterPoint.X, CurrentSpot.CenterPoint.Y) <= SnakeSize) ||
+                        (int) Segments[0].Y + SnakeSize / 2,
+                        CurrentSpot.CenterPoint.X, CurrentSpot.CenterPoint.Y) <= SnakeSize) ||
                 CurrentSpot.WasEaten) return;
             DrawingForm.Grid[CurrentSpot.Y][CurrentSpot.X].WasEaten = true;
             CurrentSpot.WasEaten = true;
             DrawingForm.Points += 10;
             DrawingForm.TargetTotalPoints += 10;
+            bool adding = false;
+            Color lastColor = Colors[Colors.Count - 1];
+            for (int i = 6; Colors[i - 6] != lastColor; i++)
+            {
+                if (adding)
+                {
+                    Colors.Add(Colors[i]);
+                }
+                if (Colors[i].ToArgb() == lastColor.ToArgb())
+                {
+                    adding = true;
+                }
+            }
             for (int i = 1; i <= 5 / MovementDistance; i++)
             {
                 Segments.Add(Segments[Segments.Count - 1] +
-                             new PointD(Segments[Segments.Count - 2].X - Segments[Segments.Count - 1].X,
-                                 Segments[Segments.Count - 2].Y - Segments[Segments.Count - 1].Y));
+                                new PointD(Segments[Segments.Count - 2].X - Segments[Segments.Count - 1].X,
+                                    Segments[Segments.Count - 2].Y - Segments[Segments.Count - 1].Y));
             }
         }
-
         public bool Inside(Spot s)
         {
-            return !(Segments[0].X + SnakeSize < s.DrawVerticies[0].X || s.DrawVerticies[2].X < Segments[0].X ||
-                     Segments[0].Y + SnakeSize < s.DrawVerticies[0].Y || s.DrawVerticies[2].Y < Segments[0].Y);
+            return !(Segments[0].X + SnakeSize <= s.DrawVerticies[0].X || s.DrawVerticies[2].X <= Segments[0].X ||
+                        Segments[0].Y + SnakeSize <= s.DrawVerticies[0].Y || s.DrawVerticies[2].Y <= Segments[0].Y);
         }
-
         public bool FullyInside(Spot s)
         {
-            Rectangle r = new Rectangle(s.DrawVerticies[0].X + 1, s.DrawVerticies[0].Y + 1, DrawingForm.SpotSize - 1,
-                DrawingForm.SpotSize - 1);
-            return r.Contains(Segments[0].Point + new Size(1, 1)) &&
-                   r.Contains(Segments[0].Point + new Size(SnakeSize - 1, SnakeSize - 1));
+            Rectangle r = new Rectangle(s.DrawVerticies[0].X, s.DrawVerticies[0].Y, DrawingForm.SpotSize,
+                DrawingForm.SpotSize);
+            return r.Contains(Segments[0].Point) &&
+                    r.Contains(Segments[0].Point + new Size(SnakeSize, SnakeSize));
         }
-
         public bool Overlapping()
         {
             for (int i = 1; i < Segments.Count; i++)
@@ -866,7 +914,6 @@ namespace SnakeMaze
         public EventHandler OnClick;
         private readonly Color _insideHover;
         public bool Enabled;
-
         public CustomButton(string name, int x, int y, string text, Color outerRim, Color insideFill, Font font,
             Graphics createdGraphics)
         {
@@ -880,7 +927,6 @@ namespace SnakeMaze
             _textSize = measureString;
             _insideHover = insideFill;
         }
-
         public CustomButton(string name, Point center, string text, Color outerRim, Color insideFill, Font font,
             Graphics createdGraphics)
         {
@@ -894,7 +940,6 @@ namespace SnakeMaze
             _textSize = measureString;
             _insideHover = insideFill;
         }
-
         public CustomButton(string name, int x, int y, string text, Color outerRim, Color insideFill, Color insideHover,
             Font font, Graphics createdGraphics)
         {
@@ -907,9 +952,7 @@ namespace SnakeMaze
             SizeF measureString = createdGraphics.MeasureString(Text, Font);
             _textSize = measureString;
             _insideHover = insideHover;
-
         }
-
         public CustomButton(string name, Point center, string text, Color outerRim, Color insideFill, Color insideHover,
             Font font, Graphics createdGraphics)
         {
@@ -923,7 +966,6 @@ namespace SnakeMaze
             _textSize = measureString;
             _insideHover = insideHover;
         }
-
         public void Draw(Graphics g)
         {
             g.FillRectangle(Hovering ? new SolidBrush(_insideHover) : new SolidBrush(_inside), Location.X - 5,
@@ -932,7 +974,6 @@ namespace SnakeMaze
                 _textSize.Height + 14);
             g.DrawString(Text, Font, new SolidBrush(_outside), Location);
         }
-
         public void Update(Point mouseLocation)
         {
             Rectangle r = new Rectangle(Location.X - 7, Location.Y - 7, (int) _textSize.Width + 14,
@@ -945,7 +986,6 @@ namespace SnakeMaze
     {
         public int Level;
         private readonly Rectangle _levelRectangle;
-
         public Menu(int level, Rectangle bounds)
         {
             Level = level;
@@ -954,7 +994,6 @@ namespace SnakeMaze
                 boundsRectangle.Height / 4 + DrawingForm.Offset.Y / 2, boundsRectangle.Width / 2,
                 boundsRectangle.Height / 2);
         }
-
         public void Draw(Graphics g)
         {
             g.DrawRectangle(new Pen(Color.White, 5), _levelRectangle);
@@ -992,13 +1031,117 @@ namespace SnakeMaze
             g.DrawString(pointsScoredString, new Font(FontFamily.GenericMonospace, 40), Brushes.White,
                 _levelRectangle.X + (_levelRectangle.Width - sizeSmall.Width) / 2, _levelRectangle.Y + 160);
         }
-
         public void OnClick(Point mousePoint)
         {
             if (!_levelRectangle.Contains(mousePoint) || DrawingForm.LevelScores[Level - 1].ToString() == "x") return;
-            DrawingForm.SpotSize = DrawingForm.StartingSpotSize + 1 - Level;
+            DrawingForm.SpotSize = DrawingForm.StartingSpotSize + 2 - 2 * Level;
             DrawingForm.GameState = 2;
             DrawingForm.Init();
+        }
+    }
+
+    public class Store
+    {
+        public static List<List<Color>> AwardList;
+        public static List<bool> EnabledList;
+        private static Rectangle _storeRectangle;
+        public int BestItem;
+        public int CurrentItem;
+        public static List<int> CostList;
+        public Store(Rectangle bounds)
+        {
+            EnabledList = new List<bool>();
+            AwardList = ColorsFrom(Settings.Default.RewardString);
+            foreach (char c in Settings.Default.EnabledString)
+            {
+                EnabledList.Add(c.ToString() == "1");
+            }
+            var boundsRectangle = bounds;
+            _storeRectangle = new Rectangle(boundsRectangle.Width / 4,
+                boundsRectangle.Height / 4 + DrawingForm.Offset.Y / 2, boundsRectangle.Width / 2,
+                boundsRectangle.Height / 2);
+            BestItem = Settings.Default.CurrentColor;
+            CurrentItem = BestItem;
+            string costString = Settings.Default.Costs;
+            costString = costString.Substring(1);
+            CostList = new List<int>();
+            while (costString.Length > 0)
+            {
+                string s = string.Empty;
+                while (costString[0] != ' ')
+                {
+                    s += costString[0].ToString();
+                    costString = costString.Substring(1);
+                }
+                costString = costString.Substring(1);
+                CostList.Add(int.Parse(s));
+            }
+        }
+        public static List<List<Color>> ColorsFrom(string colorText)
+        {
+            List<List<Color>> result = new List<List<Color>>();
+            List<string> intermediateStep = new List<string>();
+            while (colorText.Length > 0)
+            {
+                colorText = colorText.Substring(1);
+                string s = string.Empty;
+                while (colorText[0] != ']')
+                {
+                    s += colorText[0].ToString();
+                    colorText = colorText.Substring(1);
+                }
+                colorText = colorText.Substring(2);
+                intermediateStep.Add(s);
+            }
+            foreach (string b in intermediateStep)
+            {
+                result.Add(new List<Color>());
+                string c = b;
+                c = c.Substring(1);
+                while (c.Length > 0)
+                {
+                    string s = string.Empty;
+                    while (c[0] != ' ')
+                    {
+                        s += c[0].ToString();
+                        c = c.Substring(1);
+                    }
+                    c = c.Substring(1);
+                    result[result.Count - 1].Add(Color.FromArgb(int.Parse(s)));
+                }
+            }
+            return result;
+        }
+        public void Draw(Graphics g)
+        {
+            g.DrawRectangle(new Pen(Color.White, DrawingForm.RealPixels(10)), _storeRectangle);
+            SizeF sizeLarge = DrawingForm.G.MeasureString(CostList[CurrentItem].ToString(),
+                new Font(FontFamily.GenericMonospace, DrawingForm.RealPixels(80)));
+            g.FillRectangle(EnabledList[CurrentItem] ? CurrentItem == Settings.Default.CurrentColor? Brushes.DarkSlateBlue: Brushes.SlateBlue : Brushes.Gray, _storeRectangle);
+            if (!EnabledList[CurrentItem])
+                g.DrawString(CostList[CurrentItem].ToString(),
+                    new Font(FontFamily.GenericMonospace, DrawingForm.RealPixels(80)), Brushes.White,
+                    _storeRectangle.X + (_storeRectangle.Width - sizeLarge.Width) / 2, (int)( _storeRectangle.Y + _storeRectangle.Width / 3.0 - sizeLarge.Height));
+            Point exampleStart = new Point(_storeRectangle.X + _storeRectangle.Width/ 2 - 12 * DrawingForm.RealPixels(DrawingForm.PlayerSnake.MovementDistance) - DrawingForm.RealPixels(Snake.SnakeSize), (int)(_storeRectangle.Y + _storeRectangle.Height / (EnabledList[CurrentItem] ? 2 : 1.5) - Snake.SnakeSize));
+            for (int i = 0; i < 24; i++)
+            {
+                g.FillEllipse(
+                    new SolidBrush(AwardList[CurrentItem][AwardList[CurrentItem].Count - 1 - i % AwardList[CurrentItem].Count]),
+                    exampleStart.X + i * DrawingForm.RealPixels(DrawingForm.PlayerSnake.MovementDistance), exampleStart.Y,
+                    DrawingForm.RealPixels(Snake.SnakeSize * 2 + 1),
+                    DrawingForm.RealPixels(Snake.SnakeSize * 2 + 1));
+            }
+        }
+        public void OnClick(Point mousePoint)
+        {
+            if (!_storeRectangle.Contains(mousePoint) || CostList[CurrentItem] > DrawingForm.TargetTotalPoints) return;
+            BestItem = CurrentItem;
+            if(!EnabledList[CurrentItem])
+                DrawingForm.TargetTotalPoints -= CostList[BestItem];
+            EnabledList[CurrentItem] = true;
+            Settings.Default.CurrentColor = BestItem;
+            Settings.Default.EnabledString = EnabledList.Aggregate(string.Empty, (current, b) => current + (b ? "1" : "0"));
+            Snake.Colors = AwardList[Settings.Default.CurrentColor];
         }
     }
 }

@@ -1,0 +1,9 @@
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Release\SnakeMaze.exe.config
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Release\SnakeMaze.exe
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\bin\Release\SnakeMaze.pdb
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.DrawingForm.resources
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.Properties.Resources.resources
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.csproj.GenerateResource.Cache
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.exe
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.pdb
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.csprojResolveAssemblyReference.cache
