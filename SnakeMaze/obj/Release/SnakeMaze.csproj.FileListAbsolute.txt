@@ -6,3 +6,4 @@ C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.Proper
 C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.csproj.GenerateResource.Cache
 C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.exe
 C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.pdb
+C:\Users\simon\Documents\GitHub\SnakeMaze\SnakeMaze\obj\Release\SnakeMaze.csprojResolveAssemblyReference.cache

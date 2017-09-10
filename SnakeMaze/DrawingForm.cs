@@ -1121,15 +1121,15 @@ namespace SnakeMaze
             if (!EnabledList[CurrentItem])
                 g.DrawString(CostList[CurrentItem].ToString(),
                     new Font(FontFamily.GenericMonospace, DrawingForm.RealPixels(80)), Brushes.White,
-                    _storeRectangle.X + (_storeRectangle.Width - sizeLarge.Width) / 2, _storeRectangle.Y + 100);
-            Point exampleStart = new Point(_storeRectangle.X + _storeRectangle.Width/2 - 12 * DrawingForm.PlayerSnake.MovementDistance - Snake.SnakeSize, _storeRectangle.Y + _storeRectangle.Height / 2 - Snake.SnakeSize - (EnabledList[CurrentItem]  ? 0 : DrawingForm.RealPixels(60)));
+                    _storeRectangle.X + (_storeRectangle.Width - sizeLarge.Width) / 2, (int)( _storeRectangle.Y + _storeRectangle.Width / 3.0 - sizeLarge.Height));
+            Point exampleStart = new Point(_storeRectangle.X + _storeRectangle.Width/ 2 - 12 * DrawingForm.RealPixels(DrawingForm.PlayerSnake.MovementDistance) - DrawingForm.RealPixels(Snake.SnakeSize), (int)(_storeRectangle.Y + _storeRectangle.Height / (EnabledList[CurrentItem] ? 2 : 1.5) - Snake.SnakeSize));
             for (int i = 0; i < 24; i++)
             {
                 g.FillEllipse(
                     new SolidBrush(AwardList[CurrentItem][AwardList[CurrentItem].Count - 1 - i % AwardList[CurrentItem].Count]),
-                    exampleStart.X + i * DrawingForm.PlayerSnake.MovementDistance, exampleStart.Y,
-                    Snake.SnakeSize * 2 + 1,
-                    Snake.SnakeSize * 2 + 1);
+                    exampleStart.X + i * DrawingForm.RealPixels(DrawingForm.PlayerSnake.MovementDistance), exampleStart.Y,
+                    DrawingForm.RealPixels(Snake.SnakeSize * 2 + 1),
+                    DrawingForm.RealPixels(Snake.SnakeSize * 2 + 1));
             }
         }
         public void OnClick(Point mousePoint)

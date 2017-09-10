@@ -35,7 +35,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkSlateBlue;
-            this.ClientSize = new System.Drawing.Size(884, 461);
+            this.ClientSize = new System.Drawing.Size(1784, 961);
             this.Name = "DrawingForm";
             this.Text = "MazeSnake";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DrawingForm_FormClosed);
